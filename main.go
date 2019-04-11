@@ -1,18 +1,26 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/hatemosphere/crawler-experiment/crawler"
-	// "github.com/landoop/tableprinter"
 )
 
 var concurrency = 10
 
 type BasicParser struct {
+}
+
+func PrettyPrint(v interface{}) (err error) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err == nil {
+		fmt.Println(string(b))
+	}
+	return
 }
 
 func (d BasicParser) ParsePage(doc *goquery.Document) crawler.ScrapeResult {
@@ -35,8 +43,5 @@ func main() {
 
 	p := BasicParser{}
 	crawlResults := crawler.Crawl(args[0], p, concurrency)
-	fmt.Printf("%+v\n", crawlResults)
-
-	// printer := tableprinter.New(os.Stdout)
-	// printer.Print(crawlResults)
+	PrettyPrint(crawlResults)
 }
