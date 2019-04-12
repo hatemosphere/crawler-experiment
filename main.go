@@ -10,7 +10,7 @@ import (
 	"github.com/hatemosphere/crawler-experiment/crawler"
 )
 
-var concurrency = 10
+const concurrency = 10
 
 type BasicParser struct {
 }
@@ -27,7 +27,6 @@ func (d BasicParser) ParsePage(doc *goquery.Document) crawler.ScrapeResult {
 	data := crawler.ScrapeResult{}
 	data.Title = doc.Find("title").First().Text()
 	data.H1 = doc.Find("h1").First().Text()
-	data.URL = "blah" // TODO: implement
 	return data
 }
 

@@ -95,6 +95,7 @@ func crawlPage(baseURL, targetURL string, parser Parser, token chan struct{}) ([
 	links := extractLinks(doc)
 	foundUrls := resolveRelative(baseURL, links)
 	normalizedUrls := trimFragment(foundUrls)
+	pageResults.URL = targetURL
 	return normalizedUrls, pageResults
 }
 
