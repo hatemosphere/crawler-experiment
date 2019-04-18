@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -116,6 +117,7 @@ func Crawl(startURL string, parser Parser, concurrency int) []ScrapeResult {
 	seen := make(map[string]bool)
 	baseDomain := parseStartURL(startURL)
 
+	m := &sync.Mutex{}
 	for ; n > 0; n-- {
 		list := <-worklist
 		for _, link := range list {
@@ -124,7 +126,9 @@ func Crawl(startURL string, parser Parser, concurrency int) []ScrapeResult {
 				n++
 				go func(baseDomain, link string, parser Parser, token chan struct{}) {
 					foundLinks, pageResults := crawlPage(baseDomain, link, parser, token)
+					m.Lock()
 					results = append(results, pageResults)
+					m.Unlock()
 					if foundLinks != nil {
 						worklist <- foundLinks
 					}
