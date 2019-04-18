@@ -24,11 +24,14 @@ type Parser interface {
 func getRequest(url string) (*http.Response, error) {
 	client := &http.Client{}
 
-	req, _ := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
 
 	res, err := client.Do(req)
-
 	if err != nil {
 		return nil, err
 	}
@@ -90,10 +93,17 @@ func crawlPage(baseURL, targetURL string, parser Parser, token chan struct{}) ([
 
 	token <- struct{}{}
 	fmt.Println("Requesting: ", targetURL)
-	resp, _ := getRequest(targetURL)
+	resp, err := getRequest(targetURL)
+	if err != nil {
+		fmt.Println(err)
+	}
 	<-token
 
-	doc, _ := goquery.NewDocumentFromResponse(resp)
+	doc, err := goquery.NewDocumentFromResponse(resp)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	pageResults := parser.ParsePage(doc)
 	links := extractLinks(doc)
 	foundUrls := resolveRelative(baseURL, links)
@@ -103,7 +113,11 @@ func crawlPage(baseURL, targetURL string, parser Parser, token chan struct{}) ([
 }
 
 func parseStartURL(u string) string {
-	parsed, _ := url.Parse(u)
+	parsed, err := url.Parse(u)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return fmt.Sprintf("%s://%s", parsed.Scheme, parsed.Host)
 }
 
