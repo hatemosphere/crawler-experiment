@@ -64,13 +64,15 @@ func resolveRelative(baseURL string, hrefs []string) []string {
 	return internalUrls
 }
 
-func trimFragment(links []string) []string {
+func trimTrash(links []string) []string {
 	validLinks := []string{}
 	for _, l := range links {
-		if strings.Contains(l, "#") {
+		// According to https://tools.ietf.org/html/rfc3986#section-4.1
+		// query should come first, so this ugly trimming should work
+		if strings.Contains(l, "?") || strings.Contains(l, "#") {
 			var index int
 			for n, str := range l {
-				if strconv.QuoteRune(str) == "'#'" {
+				if strconv.QuoteRune(str) == "'?'" || strconv.QuoteRune(str) == "'#'" {
 					index = n
 					break
 				}
@@ -94,7 +96,7 @@ func crawlPage(baseURL, targetURL string, parser Parser, token chan struct{}) ([
 	pageResults := parser.ParsePage(doc)
 	links := extractLinks(doc)
 	foundUrls := resolveRelative(baseURL, links)
-	normalizedUrls := trimFragment(foundUrls)
+	normalizedUrls := trimTrash(foundUrls)
 	pageResults.URL = targetURL
 	return normalizedUrls, pageResults
 }
